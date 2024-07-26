@@ -1,7 +1,8 @@
 package main
 
 import (
-	"github.com/takumines/go-intermediate-book/section_2/handlers"
+	"github.com/go-chi/chi/v5"
+	"github.com/takumines/go-intermediate-book/handlers"
 	"log"
 	"net/http"
 )
