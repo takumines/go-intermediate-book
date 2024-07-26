@@ -3,7 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"github.com/go-chi/chi/v5"
-	"github.com/takumines/go-intermediate-book/models"
+	models2 "github.com/takumines/go-intermediate-book/models"
 	"io"
 	"log"
 	"net/http"
@@ -18,7 +18,7 @@ func HalloHandler(w http.ResponseWriter, req *http.Request) {
 }
 
 func PostArticleHandler(w http.ResponseWriter, req *http.Request) {
-	var reqArticle models.Article
+	var reqArticle models2.Article
 	if err := json.NewDecoder(req.Body).Decode(&reqArticle); err != nil {
 		http.Error(w, "fail to decode json \n", http.StatusBadRequest)
 		return
@@ -49,9 +49,9 @@ func ArticleListHandler(w http.ResponseWriter, req *http.Request) {
 	// コンパイルエラー回避用
 	log.Println(page)
 
-	articles := []models.Article{
-		models.Article1,
-		models.Article2,
+	articles := []models2.Article{
+		models2.Article1,
+		models2.Article2,
 	}
 
 	if err := json.NewEncoder(w).Encode(articles); err != nil {
@@ -69,7 +69,7 @@ func ArticleDetailHandler(w http.ResponseWriter, req *http.Request) {
 	// コンパイルエラー回避用
 	log.Println(articleId)
 
-	article := models.Article1
+	article := models2.Article1
 
 	if err := json.NewEncoder(w).Encode(article); err != nil {
 		http.Error(w, "internal server error \n", http.StatusInternalServerError)
@@ -78,7 +78,7 @@ func ArticleDetailHandler(w http.ResponseWriter, req *http.Request) {
 }
 
 func PostNiceArticleHandler(w http.ResponseWriter, req *http.Request) {
-	var reqArticle models.Article
+	var reqArticle models2.Article
 	if err := json.NewDecoder(req.Body).Decode(&reqArticle); err != nil {
 		http.Error(w, "fail to decode json \n", http.StatusBadRequest)
 		return
@@ -92,7 +92,7 @@ func PostNiceArticleHandler(w http.ResponseWriter, req *http.Request) {
 }
 
 func PostCommentHandler(w http.ResponseWriter, req *http.Request) {
-	var reqComment models.Comment
+	var reqComment models2.Comment
 	if err := json.NewDecoder(req.Body).Decode(&reqComment); err != nil {
 		http.Error(w, "fail to decode json \n", http.StatusBadRequest)
 		return
