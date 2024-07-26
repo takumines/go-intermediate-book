@@ -1,9 +1,11 @@
 package handlers
 
 import (
-	"fmt"
+	"encoding/json"
 	"github.com/go-chi/chi/v5"
+	"github.com/takumines/go-intermediate-book/models"
 	"io"
+	"log"
 	"net/http"
 	"strconv"
 )
@@ -16,14 +18,21 @@ func HalloHandler(w http.ResponseWriter, req *http.Request) {
 }
 
 func PostArticleHandler(w http.ResponseWriter, req *http.Request) {
-	_, err := io.WriteString(w, "Post Article\n")
-	if err != nil {
+	var reqArticle models.Article
+	if err := json.NewDecoder(req.Body).Decode(&reqArticle); err != nil {
+		http.Error(w, "fail to decode json \n", http.StatusBadRequest)
+		return
+	}
+
+	article := reqArticle
+
+	if err := json.NewEncoder(w).Encode(article); err != nil {
+		http.Error(w, "internal server error \n", http.StatusInternalServerError)
 		return
 	}
 }
 
 func ArticleListHandler(w http.ResponseWriter, req *http.Request) {
-	fmt.Printf("http request: %v\n", req)
 	queryMap := req.URL.Query()
 	var page int
 
@@ -37,37 +46,61 @@ func ArticleListHandler(w http.ResponseWriter, req *http.Request) {
 	} else {
 		page = 1
 	}
+	// コンパイルエラー回避用
+	log.Println(page)
 
-	resStr := fmt.Sprintf("Article List (page %d)\n", page)
-	_, err := io.WriteString(w, resStr)
-	if err != nil {
+	articles := []models.Article{
+		models.Article1,
+		models.Article2,
+	}
+
+	if err := json.NewEncoder(w).Encode(articles); err != nil {
+		http.Error(w, "internal server error \n", http.StatusInternalServerError)
 		return
 	}
 }
 
 func ArticleDetailHandler(w http.ResponseWriter, req *http.Request) {
-	fmt.Printf("http request: %v\n", req.PathValue("articleID"))
 	articleId, err := strconv.Atoi(chi.URLParam(req, "articleID"))
 	if err != nil {
 		http.Error(w, "Invalid query parameter", http.StatusBadRequest)
 	}
-	resStr := fmt.Sprintf("Article No.%d\n", articleId)
-	_, err = io.WriteString(w, resStr)
-	if err != nil {
+
+	// コンパイルエラー回避用
+	log.Println(articleId)
+
+	article := models.Article1
+
+	if err := json.NewEncoder(w).Encode(article); err != nil {
+		http.Error(w, "internal server error \n", http.StatusInternalServerError)
 		return
 	}
 }
 
 func PostNiceArticleHandler(w http.ResponseWriter, req *http.Request) {
-	_, err := io.WriteString(w, "Posting Nice Article\n")
-	if err != nil {
+	var reqArticle models.Article
+	if err := json.NewDecoder(req.Body).Decode(&reqArticle); err != nil {
+		http.Error(w, "fail to decode json \n", http.StatusBadRequest)
+		return
+	}
+
+	article := reqArticle
+	if err := json.NewEncoder(w).Encode(article); err != nil {
+		http.Error(w, "internal server error \n", http.StatusInternalServerError)
 		return
 	}
 }
 
 func PostCommentHandler(w http.ResponseWriter, req *http.Request) {
-	_, err := io.WriteString(w, "Comment\n")
-	if err != nil {
+	var reqComment models.Comment
+	if err := json.NewDecoder(req.Body).Decode(&reqComment); err != nil {
+		http.Error(w, "fail to decode json \n", http.StatusBadRequest)
+		return
+	}
+
+	comment := reqComment
+	if err := json.NewEncoder(w).Encode(comment); err != nil {
+		http.Error(w, "internal server error \n", http.StatusInternalServerError)
 		return
 	}
 }
