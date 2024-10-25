@@ -2,13 +2,14 @@ package repositories_test
 
 import (
 	"github.com/takumines/go-intermediate-book/repositories"
+	"github.com/takumines/go-intermediate-book/repositories/testdata"
 	"testing"
 
 	"github.com/takumines/go-intermediate-book/models"
 )
 
 func TestSelectArticleList(t *testing.T) {
-	expectedNum := 2
+	expectedNum := len(testdata.ArticleTestData)
 
 	got, err := repositories.SelectArticleList(testDB, 1)
 	if err != nil {
@@ -27,23 +28,11 @@ func TestSelectArticleDetail(t *testing.T) {
 	}{
 		{
 			testTitle: "subtest1",
-			expected: models.Article{
-				ID:       1,
-				Title:    "first post",
-				Contents: "This is my first blog",
-				UserName: "takumi",
-				Nice:     2,
-			},
+			expected:  testdata.ArticleTestData[0],
 		},
 		{
 			testTitle: "subtest1",
-			expected: models.Article{
-				ID:       2,
-				Title:    "second post",
-				Contents: "This is my second blog",
-				UserName: "takumi",
-				Nice:     3,
-			},
+			expected:  testdata.ArticleTestData[1],
 		},
 	}
 
@@ -108,5 +97,32 @@ func TestInsertArticle(t *testing.T) {
 			where title = ? and contents = ? and username = ?;
 `
 		testDB.Exec(sqlStr, expectedArticle.Title, expectedArticle.Contents, expectedArticle.UserName)
+	})
+}
+
+func TestUpdateNice(t *testing.T) {
+	articleID := 1
+	expectedNice := 3
+
+	err := repositories.UpdateNice(testDB, articleID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	expectedArticle, err := repositories.SelectArticleDetail(testDB, articleID)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if expectedArticle.Nice != expectedNice {
+		t.Errorf("Nice: got %d but want %d", expectedArticle.Nice, expectedNice)
+	}
+
+	t.Cleanup(func() {
+		const sqlStr = `
+			update articles
+			set nice = 2
+			where article_id = ?;
+`
+		testDB.Exec(sqlStr, articleID)
 	})
 }
