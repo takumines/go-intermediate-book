@@ -1,29 +1,32 @@
-package handlers
+package controllers
 
 import (
 	"encoding/json"
 	"github.com/go-chi/chi/v5"
 	"github.com/takumines/go-intermediate-book/services"
-	"io"
 	"net/http"
 	"strconv"
 
 	"github.com/takumines/go-intermediate-book/models"
 )
 
-// HelloHandler GET /hello のハンドラ
-func HelloHandler(w http.ResponseWriter, req *http.Request) {
-	io.WriteString(w, "Hello, world!\n")
+type MyAppController struct {
+	service *services.MyAppService
+}
+
+// NewMyAppController MyAppControllerのコンストラクタ
+func NewMyAppController(s *services.MyAppService) *MyAppController {
+	return &MyAppController{service: s}
 }
 
 // PostArticleHandler POST /article のハンドラ
-func PostArticleHandler(w http.ResponseWriter, req *http.Request) {
+func (c *MyAppController) PostArticleHandler(w http.ResponseWriter, req *http.Request) {
 	var reqArticle models.Article
 	if err := json.NewDecoder(req.Body).Decode(&reqArticle); err != nil {
 		http.Error(w, "fail to decode json\n", http.StatusBadRequest)
 	}
 
-	article, err := services.PostArticleService(reqArticle)
+	article, err := c.service.PostArticleService(reqArticle)
 	if err != nil {
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
@@ -34,7 +37,7 @@ func PostArticleHandler(w http.ResponseWriter, req *http.Request) {
 }
 
 // ArticleListHandler GET /article/list のハンドラ
-func ArticleListHandler(w http.ResponseWriter, req *http.Request) {
+func (c *MyAppController) ArticleListHandler(w http.ResponseWriter, req *http.Request) {
 	queryMap := req.URL.Query()
 
 	// クエリパラメータpageを取得
@@ -50,7 +53,7 @@ func ArticleListHandler(w http.ResponseWriter, req *http.Request) {
 		page = 1
 	}
 
-	articleList, err := services.GetArticleListService(page)
+	articleList, err := c.service.GetArticleListService(page)
 	if err != nil {
 		http.Error(w, "not found", http.StatusNotFound)
 		return
@@ -61,14 +64,14 @@ func ArticleListHandler(w http.ResponseWriter, req *http.Request) {
 }
 
 // ArticleDetailHandler GET /article/{id} のハンドラ
-func ArticleDetailHandler(w http.ResponseWriter, req *http.Request) {
+func (c *MyAppController) ArticleDetailHandler(w http.ResponseWriter, req *http.Request) {
 	articleID, err := strconv.Atoi(chi.URLParam(req, "id"))
 	if err != nil {
 		http.Error(w, "Invalid query parameter", http.StatusBadRequest)
 		return
 	}
 
-	article, err := services.GetArticleService(articleID)
+	article, err := c.service.GetArticleService(articleID)
 	if err != nil {
 		http.Error(w, "not found", http.StatusNotFound)
 		return
@@ -79,13 +82,13 @@ func ArticleDetailHandler(w http.ResponseWriter, req *http.Request) {
 }
 
 // PostNiceHandler POST /article/nice のハンドラ
-func PostNiceHandler(w http.ResponseWriter, req *http.Request) {
+func (c *MyAppController) PostNiceHandler(w http.ResponseWriter, req *http.Request) {
 	var reqArticle models.Article
 	if err := json.NewDecoder(req.Body).Decode(&reqArticle); err != nil {
 		http.Error(w, "fail to decode json\n", http.StatusBadRequest)
 	}
 
-	article, err := services.PostNiceService(reqArticle.ID)
+	article, err := c.service.PostNiceService(reqArticle.ID)
 	if err != nil {
 		http.Error(w, "not found", http.StatusNotFound)
 		return
@@ -96,13 +99,13 @@ func PostNiceHandler(w http.ResponseWriter, req *http.Request) {
 }
 
 // PostCommentHandler POST /comment のハンドラ
-func PostCommentHandler(w http.ResponseWriter, req *http.Request) {
+func (c *MyAppController) PostCommentHandler(w http.ResponseWriter, req *http.Request) {
 	var reqComment models.Comment
 	if err := json.NewDecoder(req.Body).Decode(&reqComment); err != nil {
 		http.Error(w, "fail to decode json\n", http.StatusBadRequest)
 	}
 
-	comment, err := services.PostCommentService(reqComment)
+	comment, err := c.service.PostCommentService(reqComment)
 	if err != nil {
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
