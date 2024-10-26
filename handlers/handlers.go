@@ -3,12 +3,11 @@ package handlers
 import (
 	"encoding/json"
 	"github.com/go-chi/chi/v5"
-	"github.com/takumines/go-intermediate-book/repositories"
+	"github.com/takumines/go-intermediate-book/services"
 	"io"
 	"net/http"
 	"strconv"
 
-	"github.com/takumines/go-intermediate-book/config/database"
 	"github.com/takumines/go-intermediate-book/models"
 )
 
@@ -24,18 +23,13 @@ func PostArticleHandler(w http.ResponseWriter, req *http.Request) {
 		http.Error(w, "fail to decode json\n", http.StatusBadRequest)
 	}
 
-	db, err := database.ConnectDB()
+	article, err := services.PostArticleService(reqArticle)
 	if err != nil {
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 
-	article, err := repositories.InsertArticle(db, reqArticle)
-	if err != nil {
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
-		return
-	}
-
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(article)
 }
 
@@ -56,18 +50,13 @@ func ArticleListHandler(w http.ResponseWriter, req *http.Request) {
 		page = 1
 	}
 
-	db, err := database.ConnectDB()
-	if err != nil {
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
-		return
-	}
-
-	articleList, err := repositories.SelectArticleList(db, page)
+	articleList, err := services.GetArticleListService(page)
 	if err != nil {
 		http.Error(w, "not found", http.StatusNotFound)
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(articleList)
 }
 
@@ -79,18 +68,13 @@ func ArticleDetailHandler(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	db, err := database.ConnectDB()
-	if err != nil {
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
-		return
-	}
-
-	article, err := repositories.SelectArticleDetail(db, articleID)
+	article, err := services.GetArticleService(articleID)
 	if err != nil {
 		http.Error(w, "not found", http.StatusNotFound)
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(article)
 }
 
@@ -101,24 +85,13 @@ func PostNiceHandler(w http.ResponseWriter, req *http.Request) {
 		http.Error(w, "fail to decode json\n", http.StatusBadRequest)
 	}
 
-	db, err := database.ConnectDB()
-	if err != nil {
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
-		return
-	}
-
-	err = repositories.UpdateNice(db, reqArticle.ID)
-	if err != nil {
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
-		return
-	}
-
-	article, err := repositories.SelectArticleDetail(db, reqArticle.ID)
+	article, err := services.PostNiceService(reqArticle.ID)
 	if err != nil {
 		http.Error(w, "not found", http.StatusNotFound)
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(article)
 }
 
@@ -129,17 +102,12 @@ func PostCommentHandler(w http.ResponseWriter, req *http.Request) {
 		http.Error(w, "fail to decode json\n", http.StatusBadRequest)
 	}
 
-	db, err := database.ConnectDB()
+	comment, err := services.PostCommentService(reqComment)
 	if err != nil {
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 
-	comment, err := repositories.InsertComment(db, reqComment)
-	if err != nil {
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
-		return
-	}
-
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(comment)
 }
