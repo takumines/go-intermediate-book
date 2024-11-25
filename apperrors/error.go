@@ -3,7 +3,7 @@ package apperrors
 type MyAppError struct {
 	ErrCode
 	Message string
-	Err     error
+	Err     error `json:"-"`
 }
 
 // Error えらーを文字列に変換する
