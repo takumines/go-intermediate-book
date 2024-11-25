@@ -15,12 +15,3 @@ func (myErr *MyAppError) Error() string {
 func (myErr *MyAppError) Unwrap() error {
 	return myErr.Err
 }
-
-// Wrap エラーコードとメッセージを指定してエラーをラップする
-func (code ErrCode) Wrap(err error, message string) *MyAppError {
-	return &MyAppError{
-		ErrCode: code,
-		Message: message,
-		Err:     err,
-	}
-}
