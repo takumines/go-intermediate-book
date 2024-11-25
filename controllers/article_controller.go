@@ -3,6 +3,7 @@ package controllers
 import (
 	"encoding/json"
 	"github.com/go-chi/chi/v5"
+	"github.com/takumines/go-intermediate-book/apperrors"
 	"github.com/takumines/go-intermediate-book/controllers/services"
 	"github.com/takumines/go-intermediate-book/models"
 	"net/http"
@@ -20,8 +21,8 @@ func NewArticleController(a services.ArticleServicer) *ArticleController {
 // PostArticleHandler POST /article のハンドラ
 func (c *ArticleController) PostArticleHandler(w http.ResponseWriter, req *http.Request) {
 	var reqArticle models.Article
-	w.Header().Get()
 	if err := json.NewDecoder(req.Body).Decode(&reqArticle); err != nil {
+		err = apperrors.ReqBodyDecodeFailed.Wrap(err, "bad request body")
 		http.Error(w, "fail to decode json\n", http.StatusBadRequest)
 	}
 
@@ -45,6 +46,7 @@ func (c *ArticleController) ArticleListHandler(w http.ResponseWriter, req *http.
 		var err error
 		page, err = strconv.Atoi(p[0])
 		if err != nil {
+			err = apperrors.BadParam.Wrap(err, "queryparam must be number")
 			http.Error(w, "Invalid query parameter", http.StatusBadRequest)
 			return
 		}
@@ -66,6 +68,7 @@ func (c *ArticleController) ArticleListHandler(w http.ResponseWriter, req *http.
 func (c *ArticleController) ArticleDetailHandler(w http.ResponseWriter, req *http.Request) {
 	articleID, err := strconv.Atoi(chi.URLParam(req, "id"))
 	if err != nil {
+		err = apperrors.BadParam.Wrap(err, "pathparam must be number")
 		http.Error(w, "Invalid query parameter", http.StatusBadRequest)
 		return
 	}
@@ -84,6 +87,7 @@ func (c *ArticleController) ArticleDetailHandler(w http.ResponseWriter, req *htt
 func (c *ArticleController) PostNiceHandler(w http.ResponseWriter, req *http.Request) {
 	var reqArticle models.Article
 	if err := json.NewDecoder(req.Body).Decode(&reqArticle); err != nil {
+		err = apperrors.ReqBodyDecodeFailed.Wrap(err, "bad request body")
 		http.Error(w, "fail to decode json\n", http.StatusBadRequest)
 	}
 
